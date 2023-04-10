@@ -18,6 +18,9 @@ type SQSClient interface {
 
 	DeleteMessage(ctx context.Context, params *sqs.DeleteMessageInput,
 		optFns ...func(*sqs.Options)) (*sqs.DeleteMessageOutput, error)
+
+	SendMessage(ctx context.Context, params *sqs.SendMessageInput,
+		optsFns ...func(*sqs.Options)) (*sqs.SendMessageOutput, error)
 }
 
 func GetQueueURL(queue string) *sqs.GetQueueUrlOutput {
@@ -63,6 +66,21 @@ func RemoveMessage(queue string, ReceiptHandle string) {
 	}
 
 	log.Println("- Message deleted successfully")
+}
+
+func QueueMessage(MessageObject *sqs.SendMessageInput) {
+
+	cfg := util.Cfg
+
+	client := sqs.NewFromConfig(cfg)
+
+	_, err := client.SendMessage(context.Background(), MessageObject)
+
+	if err != nil {
+		log.Fatal("- Unable to queue message")
+	}
+
+	log.Println("- Message queued successfully")
 }
 
 func DequeueMessage(queue string, messages chan []types.Message) {
